@@ -1,0 +1,22 @@
+@startuml
+participant "Jockey (JS)" as JS
+participant "WebView" as WV
+participant JockeyWebViewClient as WVC
+participant "Jockey (Java)" as Java
+autonumber "<b>[00]"
+== JS绑定事件 ==
+JS -> JS : Jockey.on("show-image", function(payload, complete) {...} \n listeners中以show-image为id存放一个数组，\n并将这个function push到数组中
+== java调用JS中已绑定的方法 ==
+Java -> Java : jockey.send("show-image", webView, new JockeyCallback() {...})\n 以请求的次序为id将callback函数存放到_callbacks中\n将请求参数转换为 \n"javascript:Jockey.trigger(\"%s\", %d, %s)"的形式
+Java -> WV : 传递到 WebView中执行 \n"javascript:Jockey.trigger(\"%s\", %d, %s)"
+WV -> JS : 执行js函数Jockey.trigger(\"%s\", %d, %s)
+JS -> JS : 从listeners中找到已绑定的show-image\n执行数组中的function
+
+== JS回调Java中的callback对象 ==
+JS -> WV : window.location.href = "jockey://"\n + type（callback） + "/" + envelope.id + "?" \n+ encodeURIComponent(JSON.stringify(envelope));
+WV -> WVC : shouldOverrideUrlLoading(WebView view, String url)
+WVC -> Java : 拦截"jockey"scheme \n(jockey://callback/0?%7B%2%7D)，发现是\ncallback类型，解析出messageId转交Jockey处理
+Java -> Java : 从_callbacks中找到messageId对应的callback执行\n并从_callbacks中移除。
+== java调用JS中已绑定的方法 ==
+
+@enduml

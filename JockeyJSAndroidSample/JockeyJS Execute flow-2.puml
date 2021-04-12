@@ -1,0 +1,21 @@
+@startuml
+participant "Jockey (JS)" as JS
+participant "WebView" as WV
+participant JockeyWebViewClient as WVC
+participant "Jockey (Java)" as Java
+autonumber "<b>[00]"
+== Java绑定事件 ==
+Java -> Java : jockey.on("log", new JockeyHandler() {...}) \nJockeyImpl的_listeners中\n以log为id存放一个复合回调CJH，\n并将这个JockeyHandler放到CJH中
+== JS调用Java中已绑定的方法 ==
+JS -> JS : Jockey.send("log", function(){...}); 以请求的messageCount\n为id将callback函数存放到callbacks中。
+JS -> WV : 将请求参数拼接成新的地址设置给浏览器 \nwindow.location.href = "jockey://"\n + type（event） + "/" + envelope.id + "?" \n+ encodeURIComponent(JSON.stringify(envelope));
+WV -> WVC: shouldOverrideUrlLoading(WebView view, String url)
+WVC -> Java : 拦截"jockey"scheme \n(jockey://event/0?%7B%2%7D)，发现是\nevent类型，解析出messageId转交Jockey处理
+Java -> Java : 从_listeners中找到已绑定的"log"执行CJH中的\nJockeyHandler,最后onComplete回调JS的callback
+
+== Java回调JS中的callback对象 ==
+Java -> WV : 传递到 WebView中执行 "javascript:Jockey.triggerCallback(\"%d\")"
+WV -> JS : WebView调用Jockey脚本中对应的triggerCallback function
+JS -> JS : 从callbacks 中找到messageId对应的callback执行。
+
+@enduml

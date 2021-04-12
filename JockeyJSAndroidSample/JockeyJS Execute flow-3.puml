@@ -1,0 +1,8 @@
+@startuml
+
+node "Other Groups" {
+  FTP - [Second Component]
+  [First Component] --> FTP
+}
+
+@enduml
