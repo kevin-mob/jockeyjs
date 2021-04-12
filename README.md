@@ -7,10 +7,12 @@ It also supports communication between iframes running inside a webview.
 <img src="example.png" height="521px" width="277px" />
 
 框架分析图
+========
 js注册事件，java层调用，最终将执行结果回调到java层
-
+-----
 <img src="JockeyJS_Execute_flow_1.png"/>
 java层注册事件，js层调用，最终将执行结果回调到js层
+-----
 <img src="JockeyJS_Execute_flow_2.png"/>
 
 Setup - iOS
